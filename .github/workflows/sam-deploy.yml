@@ -23,7 +23,7 @@ concurrency:
 env:
   AWS_REGION: eu-west-1
   CANDIDATE: ${{ vars.KANDIDATNR }} # Sett som Repository Variable
-  STACK_NAME: aialpha-sentiment-kandidat-${{ env.CANDIDATE }}
+  STACK_NAME: aialpha-sentiment-kandidat-${{ vars.KANDIDATNR }}
 
 jobs:
   pr-validate:
