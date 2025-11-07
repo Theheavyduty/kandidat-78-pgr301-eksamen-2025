@@ -90,6 +90,4 @@ jobs:
             -backend-config="key=kandidat-${{ vars.KANDIDATNR }}/infra-s3/terraform.tfstate"
 
       - name: Terraform apply
-        run: |
-          terraform apply -auto-approve \
-            -var="bucket_name=kandidat-${{ vars.KANDIDATNR }}-data"
+        run: terraform apply -input=false -auto-approve
