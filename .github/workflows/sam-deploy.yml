@@ -25,7 +25,7 @@ env:
 
 jobs:
   pr-validate:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -36,9 +36,9 @@ jobs:
       # Installer SAM i runner (manuelt som beskrevet)
       - name: Install SAM CLI
         run: |
-          wget https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip
-          unzip -q aws-sam-cli-linux-x86_64.zip -d sam-installation
-          sudo ./sam-installation/install
+          wget -q https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip
+          unzip -q -o aws-sam-cli-linux-x86_64.zip -d sam-installation
+          sudo ./sam-installation/install --update
           sam --version
 
       # (Valgfritt) Python hvis du trenger det for build
