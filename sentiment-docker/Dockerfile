@@ -1,39 +1,26 @@
-# syntax=docker/dockerfile:1
+# ---------- Build stage ----------
+FROM maven:3.9-eclipse-temurin-21 AS build
+WORKDIR /app
 
-########################
-# 1) BUILD STAGE
-########################
-FROM maven:3.9-amazoncorretto-21 AS build
-WORKDIR /workspace
+COPY pom.xml .
+RUN mvn -q -e -B -DskipTests dependency:go-offline
 
-# Kopier kun pom først for best mulig cache
-COPY pom.xml ./
-# Last ned dependencies (cache)
-RUN mvn -B -q -DskipTests dependency:go-offline
-
-# Kopier resten av koden og bygg
 COPY src ./src
-# Bygg og repackage til kjørbar fat JAR
-RUN mvn -B -DskipTests package spring-boot:repackage
+RUN mvn -q -e -B -DskipTests clean package
 
-########################
-# 2) RUNTIME STAGE
-########################
-FROM amazoncorretto:21-alpine
+# Plukk første .jar og legg den på en fast sti vi kan kopiere fra
+RUN JAR="$(ls -1 target/*.jar | head -n1)" && cp "$JAR" /tmp/app.jar
 
-# (Valgfritt) kjør som non-root
-RUN addgroup -S spring && adduser -S spring -G spring
+# ---------- Runtime stage ----------
+FROM eclipse-temurin:21-jre
+WORKDIR /opt/app
+
+# Non-root for sikkerhet
+RUN useradd -r -u 10001 spring && chown -R spring:spring /opt/app
 USER spring
 
-WORKDIR /app
-# Kopier den repackaged jar-en fra build-stage og gi den et konsistent navn
-COPY --from=build /workspace/target/*.jar /app/app.jar
+# Her får vi med selve artefaktet
+COPY --from=build /tmp/app.jar /opt/app/app.jar
 
-# Eksponer Spring Boot-port
 EXPOSE 8080
-
-# (Valgfritt) JAVA_OPTS for tuning (heap, GC, etc.)
-ENV JAVA_OPTS=""
-
-# Start applikasjonen
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]
+ENTRYPOINT ["java","-jar","/opt/app/app.jar"]
