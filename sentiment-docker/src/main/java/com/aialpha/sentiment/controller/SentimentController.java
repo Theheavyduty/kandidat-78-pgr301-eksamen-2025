@@ -34,6 +34,9 @@ public class SentimentController {
             // Call Bedrock to analyze sentiment
             List<CompanySentiment> companies = bedrockService.analyzeSentiment(request.getText());
 
+            sentimentMetrics.recordCompaniesDetected(companies.size());
+
+
             // Create result
             SentimentResult result = new SentimentResult(
                     request.getRequestId(),
@@ -52,12 +55,29 @@ public class SentimentController {
                 sentimentMetrics.recordAnalysis(company.getSentiment(), company.getCompany());
                 sentimentMetrics.recordConfidence(company.getConfidence(), company.getSentiment(), company.getCompany());
                 sentimentMetrics.recordDuration(duration, company.getCompany(), bedrockService.getModelId());
+
+                    sentimentMetrics.recordConfidence(
+                    company.getConfidence(),
+                    company.getSentiment(),
+                    company.getCompany()
+                    );
             }
 
+                        sentimentMetrics.recordCompaniesDetected(result.getCompanies().size());
+
+            // For each company, count analysis + record confidence
+            for (var c : result.getCompanies()) {
+            sentimentMetrics.recordAnalysis(c.getSentiment(), c.getCompany());
+            sentimentMetrics.recordConfidence(c.getConfidence(), c.getSentiment(), c.getCompany());
+        }
+
             return ResponseEntity.ok(result);
+
+
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+
     }
 
     @GetMapping("/health")

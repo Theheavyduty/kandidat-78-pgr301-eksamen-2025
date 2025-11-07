@@ -1,0 +1,10 @@
+/Users/alexsfluong/Downloads/pgr301-eksamen-2025-main/sentiment-docker/src/main/java/com/aialpha/sentiment/model/CompanySentiment.java
+/Users/alexsfluong/Downloads/pgr301-eksamen-2025-main/sentiment-docker/src/main/java/com/aialpha/sentiment/controller/SentimentController.java
+/Users/alexsfluong/Downloads/pgr301-eksamen-2025-main/sentiment-docker/src/main/java/com/aialpha/sentiment/service/S3StorageService.java
+/Users/alexsfluong/Downloads/pgr301-eksamen-2025-main/sentiment-docker/src/main/java/com/aialpha/sentiment/config/AwsConfig.java
+/Users/alexsfluong/Downloads/pgr301-eksamen-2025-main/sentiment-docker/src/main/java/com/aialpha/sentiment/model/SentimentResult.java
+/Users/alexsfluong/Downloads/pgr301-eksamen-2025-main/sentiment-docker/src/main/java/com/aialpha/sentiment/SentimentDockerApplication.java
+/Users/alexsfluong/Downloads/pgr301-eksamen-2025-main/sentiment-docker/src/main/java/com/aialpha/sentiment/model/AnalysisRequest.java
+/Users/alexsfluong/Downloads/pgr301-eksamen-2025-main/sentiment-docker/src/main/java/com/aialpha/sentiment/config/MetricsConfig.java
+/Users/alexsfluong/Downloads/pgr301-eksamen-2025-main/sentiment-docker/src/main/java/com/aialpha/sentiment/metrics/SentimentMetrics.java
+/Users/alexsfluong/Downloads/pgr301-eksamen-2025-main/sentiment-docker/src/main/java/com/aialpha/sentiment/service/BedrockService.java
