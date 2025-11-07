@@ -23,7 +23,7 @@ env:
 jobs:
   # PR: fmt/validate/plan (ingen apply)
   tf-validate-plan:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: infra-s3 } }
     steps:
@@ -59,7 +59,7 @@ jobs:
 
   # Prod: apply på main
   tf-apply:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/main') }}
     runs-on: ubuntu-latest
     concurrency: { group: terraform-apply, cancel-in-progress: false }
     defaults: { run: { working-directory: infra-s3 } }
