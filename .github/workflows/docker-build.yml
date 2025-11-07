@@ -1,4 +1,4 @@
-name: docker-build
+name: docker-build-publish
 
 on:
   push:
@@ -10,7 +10,6 @@ permissions:
   contents: read
 
 env:
-  # Bytt ev. ut repo-navn til ditt eget bildetnavn
   IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/sentiment-docker
 
 jobs:
