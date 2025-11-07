@@ -51,3 +51,7 @@ retrospektiver hvor teamet dokumenterer hva KI foreslo og hva vi endret.
 Kunnskapsdeling. IaC i repoet, README_SVAR.md med terskelbegrunnelser, og dashboards/alarmer som “levende dokumentasjon” sikrer at læring blir kollektiv. Nye ferdigheter som trengs: skrive verifiserbare prompts/akseptansekriterier, tolke CI/observability-signal, og praktisk sikkerhet (secrets-håndtering, minst privilegium).
 Konklusjon
 KI kan gi betydelig bedre flyt ved å automatisere stillas og repetisjon, men kun når output raskt valideres i CI og i produksjon. Feedback må styrkes: tester, telemetri, dashboards og alarmer gjør at vi oppdager AI-feil tidlig og kobler dem til målbare signaler. Kontinuerlig læring skjer når vi bruker KI som sparringspartner, men beholder menneskelig dømmekraft og bygger teamets “guardrails” i kode, dokumentasjon og prosess. Den beste balansen jeg erfarte i oppgaven er: la KI skrive førsteutkastet, la pipeline og observabilitet dømme, og la teamet justere – slik blir både tempo, kvalitet og læring bedre over tid.
+
+### Oppgave 2 
+- Her er url: https://79ba8jc1jh.execute-api.eu-west-1.amazonaws.com/Prod/analyze/ 
+- Her er s43 object: s3://kandidat-78-data/midlertidig/comprehend-20251107-225637-2718ec4f.json
