@@ -2,14 +2,14 @@ name: sam-pipeline
 
 on:
   pull_request:
-    # Gjelder PR-er til hvilken som helst base-branch
     paths:
       - "sam-comprehend/**"
       - ".github/**"
   push:
-    branches: [ "main" ]                    # Deploy kun på main
+    branches: [ "main" ]
     paths:
       - "sam-comprehend/**"
+      - ".github/**"
 
 permissions:
   contents: read
@@ -17,22 +17,36 @@ permissions:
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
-  STACK_NAME: sam-sentiment-${{ secrets.KANDIDATNR }}
   CANDIDATE_ID: ${{ secrets.KANDIDATNR }}
-  ARTIFACT_BUCKET: kandidat-${{ secrets.KANDIDATNR }}-data
+  # Appens data-bucket (parameter til SAM-templaten)
+  DATA_BUCKET: kandidat-${{ secrets.KANDIDATNR }}-data
+  # Stack-navn bygges av kandidatnummer (ikke hardkod)
+  STACK_NAME: sam-sentiment-${{ secrets.KANDIDATNR }}
 
 jobs:
-  # PR: validate + build (ingen deploy)
   pr-validate:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    defaults: { run: { working-directory: sam-comprehend } }
+    defaults:
+      run:
+        working-directory: sam-comprehend
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
-      - uses: aws-actions/setup-sam@v2
 
+      # Installer SAM i runner (manuelt som beskrevet)
+      - name: Install SAM CLI
+        run: |
+          wget https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip
+          unzip -q aws-sam-cli-linux-x86_64.zip -d sam-installation
+          sudo ./sam-installation/install
+          sam --version
+
+      # (Valgfritt) Python hvis du trenger det for build
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # AWS creds fra repository secrets (kreves for validate/build som kan gjøre cfn-resolvere)
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -46,18 +60,29 @@ jobs:
       - name: SAM build
         run: sam build --cached
 
-  # Prod: deploy på main
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: production
-    concurrency: { group: sam-deploy, cancel-in-progress: false }
-    defaults: { run: { working-directory: sam-comprehend } }
+    concurrency:
+      group: sam-deploy
+      cancel-in-progress: false
+    defaults:
+      run:
+        working-directory: sam-comprehend
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install SAM CLI
+        run: |
+          wget https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip
+          unzip -q aws-sam-cli-linux-x86_64.zip -d sam-installation
+          sudo ./sam-installation/install
+          sam --version
+
       - uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
-      - uses: aws-actions/setup-sam@v2
+        with:
+          python-version: '3.11'
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -74,11 +99,12 @@ jobs:
 
       - name: SAM deploy
         run: |
+          # Bruk --resolve-s3 for artifacts-bucket (ikke hardkode)
           sam deploy \
             --stack-name "${STACK_NAME}" \
-            --s3-bucket "${ARTIFACT_BUCKET}" \
-            --s3-prefix "${STACK_NAME}" \
+            --resolve-s3 \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
             --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-            --parameter-overrides CandidateNumber=${{ env.CANDIDATE_ID }}
+            --parameter-overrides \
+              S3BucketName="${DATA_BUCKET}"

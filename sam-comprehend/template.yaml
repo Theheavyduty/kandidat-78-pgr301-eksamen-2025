@@ -6,7 +6,7 @@ Globals:
   Function:
     Timeout: 30
     MemorySize: 256
-    Runtime: python3.11
+    Runtime: python3.12
 
 Parameters:
   S3BucketName:
@@ -18,14 +18,14 @@ Resources:
   SentimentAnalysisFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: sentiment_function/
+      CodeUri: sentiment_function/ 
       Handler: app.lambda_handler
       Environment:
         Variables:
-          S3_BUCKET: kandidat-78-data
+          S3_BUCKET: !Ref S3BucketName
       Policies:
         - S3CrudPolicy:
-            BucketName: kandidat-78-data
+            BucketName: !Ref S3BucketName
         - Statement:
           - Effect: Allow
             Action:
@@ -47,4 +47,3 @@ Outputs:
   SentimentAnalysisFunction:
     Description: "Sentiment Analysis Lambda Function ARN"
     Value: !GetAtt SentimentAnalysisFunction.Arn
-# hello
