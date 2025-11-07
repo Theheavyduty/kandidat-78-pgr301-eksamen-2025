@@ -1,10 +1,15 @@
 name: docker-build-publish
 
 on:
-  push:
-    branches: [ "main" ]
+  pull_request:
+
     paths:
       - "sentiment-docker/**"
+      - ".github/workflows/docker-build.yml"
+  push:
+    branches: [ "main" ]                      # Publiser kun på main
+    paths:
+      - "sentiment-docker/**"                 # Ikke trigge prod på kun YAML-endringer
 
 permissions:
   contents: read
@@ -13,15 +18,11 @@ env:
   IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/sentiment-docker
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Buildx
-        uses: docker/setup-buildx-action@v3
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
 
       - name: Docker meta (tags & labels)
         id: meta
@@ -33,13 +34,26 @@ jobs:
             type=sha,prefix=sha-,format=short
             type=raw,value=v${{ secrets.KANDIDATNR }}
 
+      # PR: bygg uten publish
+      - name: Build only (PR)
+        if: github.event_name == 'pull_request'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./sentiment-docker
+          file: ./sentiment-docker/Dockerfile
+          push: false
+          load: true
+
+      # Prod: publish på main
       - name: Login to Docker Hub
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Build and push
+      - name: Build and push (main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: docker/build-push-action@v6
         with:
           context: ./sentiment-docker
@@ -48,5 +62,3 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
-
-# ci: kick PR run Fri Nov  7 16:03:25 CET 2025
