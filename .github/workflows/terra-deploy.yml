@@ -1,0 +1,95 @@
+name: infra-s3
+
+on:
+  pull_request:
+    paths:
+      - 'infra-s3/**'
+      - '.github/**'
+  push:
+    branches: [ main ]
+    paths:
+      - 'infra-s3/**'
+      - '.github/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: infra-s3-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: eu-west-1
+  TF_VERSION: 1.6.6
+
+jobs:
+  plan:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra-s3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS credentials (repository secrets)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }} # optional for temporary creds
+
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init (backend S3)
+        run: |
+          terraform init \
+            -backend-config="bucket=pgr301-terraform-state" \
+            -backend-config="region=${{ env.AWS_REGION }}" \
+            -backend-config="key=kandidat-${{ vars.KANDIDATNR }}/infra-s3/terraform.tfstate"
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Terraform plan
+        run: |
+          terraform plan \
+            -var="bucket_name=kandidat-${{ vars.KANDIDATNR }}-data"
+
+  apply:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    defaults:
+      run:
+        working-directory: infra-s3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS credentials (repository secrets)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+
+      - name: Terraform init (backend S3)
+        run: |
+          terraform init \
+            -backend-config="bucket=pgr301-terraform-state" \
+            -backend-config="region=${{ env.AWS_REGION }}" \
+            -backend-config="key=kandidat-${{ vars.KANDIDATNR }}/infra-s3/terraform.tfstate"
+
+      - name: Terraform apply
+        run: |
+          terraform apply -auto-approve \
+            -var="bucket_name=kandidat-${{ vars.KANDIDATNR }}-data"
