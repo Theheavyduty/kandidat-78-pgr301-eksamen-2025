@@ -15,7 +15,7 @@ object_ownership = "BucketOwnerEnforced"
 }
 
 
-# Blokker offentlig tilgang (sikker default)
+# Blokker offentlig tilgang (sikker default hei)
 resource "aws_s3_bucket_public_access_block" "this" {
 bucket = aws_s3_bucket.this.id
 block_public_acls = true
