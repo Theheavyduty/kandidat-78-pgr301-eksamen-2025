@@ -1,15 +1,17 @@
-name: Deploy SAM Application
+name: sam-pipeline
 
 on:
   pull_request:
     branches: [ "main" ]
     paths:
       - "sam-comprehend/**"
-      # - ".github/**"   # Fjern kommentaren hvis du også vil trigge ved workflow-endringer
+      - ".github/**"
   push:
-    branches: [ "main" ]
+    branches: [ "main", "test-workflows" ]
     paths:
       - "sam-comprehend/**"
+      - ".github/**"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -18,66 +20,68 @@ env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   STACK_NAME: sam-sentiment-${{ secrets.KANDIDATNR }}
   CANDIDATE_ID: ${{ secrets.KANDIDATNR }}
+  ARTIFACT_BUCKET: kandidat-${{ secrets.KANDIDATNR }}-data
 
 jobs:
+  # PR-validering
   pr-validate:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: sam-comprehend
+    defaults: { run: { working-directory: sam-comprehend } }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+        with: { python-version: '3.11' }
       - uses: aws-actions/setup-sam@v2
-
       - name: SAM validate
         run: sam validate
-
       - name: SAM build
         run: sam build --cached
 
+  # Branch-validering (push til ikke-main)
+  branch-validate:
+    if: github.event_name == 'push' && github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: sam-comprehend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - uses: aws-actions/setup-sam@v2
+      - name: SAM validate
+        run: sam validate
+      - name: SAM build
+        run: sam build --cached
+
+  # Deploy kun på main
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: production
-    concurrency:
-      group: sam-deploy
-      cancel-in-progress: false
-    defaults:
-      run:
-        working-directory: sam-comprehend
+    concurrency: { group: sam-deploy, cancel-in-progress: false }
+    defaults: { run: { working-directory: sam-comprehend } }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+        with: { python-version: '3.11' }
       - uses: aws-actions/setup-sam@v2
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-
       - name: SAM validate
         run: sam validate
-
       - name: SAM build
         run: sam build --cached
-
       - name: SAM deploy
         run: |
           sam deploy \
             --stack-name "${STACK_NAME}" \
+            --s3-bucket "${ARTIFACT_BUCKET}" \
+            --s3-prefix "${STACK_NAME}" \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
-            --resolve-s3 \
             --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
             --parameter-overrides CandidateNumber=${{ env.CANDIDATE_ID }}
-
-
-            
