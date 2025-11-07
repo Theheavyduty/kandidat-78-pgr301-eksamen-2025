@@ -18,6 +18,7 @@ permissions:
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
   STACK_NAME: sam-sentiment-${{ secrets.KANDIDATNR }}
   CANDIDATE_ID: ${{ secrets.KANDIDATNR }}
   ARTIFACT_BUCKET: kandidat-${{ secrets.KANDIDATNR }}-data
@@ -85,3 +86,4 @@ jobs:
             --no-fail-on-empty-changeset \
             --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
             --parameter-overrides CandidateNumber=${{ env.CANDIDATE_ID }}
+
