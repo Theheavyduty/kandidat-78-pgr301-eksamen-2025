@@ -2,26 +2,25 @@ name: terraform-ci
 
 on:
   pull_request:
-    branches: [ "main" ]
+    # Gjelder PR-er til hvilken som helst base-branch
     paths:
       - "infra-s3/**"
       - ".github/**"
   push:
-    branches: [ "main", "test-workflows" ]
+    branches: [ "main" ]                    # Apply kun på main
     paths:
       - "infra-s3/**"
-      - ".github/**"
-  workflow_dispatch:
 
 permissions:
   contents: read
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
   BUCKET_NAME: kandidat-${{ secrets.KANDIDATNR }}-data
 
 jobs:
-  # PR: plan (ingen apply)
+  # PR: fmt/validate/plan (ingen apply)
   tf-validate-plan:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -29,51 +28,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
-        with: { terraform_version: 1.9.6 }
+        with:
+          terraform_version: 1.9.6
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+
       - name: Terraform init
         run: terraform init -input=false
+
       - name: Terraform fmt -check
         run: terraform fmt -check -recursive
+
       - name: Terraform validate
         run: terraform validate
+
       - name: Terraform plan
         run: terraform plan -input=false -var="bucket_name=${{ env.BUCKET_NAME }}" -out=tfplan
-      - uses: actions/upload-artifact@v4
-        with: { name: tfplan, path: infra-s3/tfplan }
 
-  # Push til ikke-main: plan (ingen apply)
-  tf-validate-plan-non-main:
-    if: github.event_name == 'push' && github.ref != 'refs/heads/main'
-    runs-on: ubuntu-latest
-    defaults: { run: { working-directory: infra-s3 } }
-    steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
-        with: { terraform_version: 1.9.6 }
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Last opp plan som artifact
+        uses: actions/upload-artifact@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-      - name: Terraform init
-        run: terraform init -input=false
-      - name: Terraform fmt -check
-        run: terraform fmt -check -recursive
-      - name: Terraform validate
-        run: terraform validate
-      - name: Terraform plan
-        run: terraform plan -input=false -var="bucket_name=${{ env.BUCKET_NAME }}" -out=tfplan
-      - uses: actions/upload-artifact@v4
-        with: { name: tfplan, path: infra-s3/tfplan }
+          name: tfplan
+          path: infra-s3/tfplan
 
-  # Apply kun på main
+  # Prod: apply på main
   tf-apply:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -82,14 +65,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
-        with: { terraform_version: 1.9.6 }
+        with:
+          terraform_version: 1.9.6
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+
       - name: Terraform init
         run: terraform init -input=false
+
       - name: Terraform apply
         run: terraform apply -input=false -auto-approve -var="bucket_name=${{ env.BUCKET_NAME }}"

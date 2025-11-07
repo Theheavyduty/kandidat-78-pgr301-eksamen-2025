@@ -2,14 +2,14 @@ name: docker-build-publish
 
 on:
   pull_request:
+    # Gjelder PR-er til hvilken som helst base-branch
     paths:
       - "sentiment-docker/**"
       - ".github/workflows/docker-build.yml"
   push:
-    branches: [ "main", "test-workflows" ]
+    branches: [ "main" ]                      # Publiser kun på main
     paths:
-      - "sentiment-docker/**"
-      - ".github/workflows/docker-build.yml"
+      - "sentiment-docker/**"                 # Ikke trigge prod på kun YAML-endringer
 
 permissions:
   contents: read
@@ -34,9 +34,9 @@ jobs:
             type=sha,prefix=sha-,format=short
             type=raw,value=v${{ secrets.KANDIDATNR }}
 
-      # Bygg på PR og på push til ikke-main (ingen publish)
-      - name: Build only (PR / non-main)
-        if: github.event_name == 'pull_request' || github.ref != 'refs/heads/main'
+      # PR: bygg uten publish
+      - name: Build only (PR)
+        if: github.event_name == 'pull_request'
         uses: docker/build-push-action@v6
         with:
           context: ./sentiment-docker
@@ -44,7 +44,7 @@ jobs:
           push: false
           load: true
 
-      # Publiser kun på push til main
+      # Prod: publish på main
       - name: Login to Docker Hub
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: docker/login-action@v3

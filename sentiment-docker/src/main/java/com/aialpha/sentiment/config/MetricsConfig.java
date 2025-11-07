@@ -2,6 +2,7 @@ package com.aialpha.sentiment.config;
 
 import io.micrometer.cloudwatch2.CloudWatchConfig;
 import io.micrometer.cloudwatch2.CloudWatchMeterRegistry;
+
 import io.micrometer.core.instrument.Clock;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +15,21 @@ import java.util.Map;
 
 @Configuration
 public class MetricsConfig {
+    @Bean
+    CloudWatchMeterRegistry cloudWatchMeterRegistry(Clock clock, CloudWatchAsyncClient cw) {
+        CloudWatchConfig config = new CloudWatchConfig() {
+            private final Map<String, String> cfg = Map.of(
+                "cloudwatch.namespace", "kandidat-78-SentimentApp",  // <-- bytt <NR>
+                "cloudwatch.step", Duration.ofSeconds(1).toString()
+            );
+
+            @Override public String get(String key) { return cfg.get(key); }
+        };
+
+        // Use the existing CloudWatchAsyncClient bean (injected as 'cw') and the constructor:
+        return new CloudWatchMeterRegistry(config, clock, cw);
+    }
+
     @Bean
     public CloudWatchAsyncClient cloudWatchAsyncClient() {
         return CloudWatchAsyncClient
@@ -37,8 +53,8 @@ public class MetricsConfig {
             // TODO: VIKTIG! Endre "SentimentApp" til ditt kandidatnummer (f.eks. "kandidat123")
             // Du MÅ bruke SAMME namespace når du lager CloudWatch Dashboard i Terraform!
             private Map<String, String> configuration = Map.of(
-                    "cloudwatch.namespace", "SentimentApp",
-                    "cloudwatch.step", Duration.ofSeconds(5).toString());
+                    "cloudwatch.namespace", "kandidat78",
+                    "cloudwatch.step", Duration.ofSeconds(1).toString());
 
             @Override
             public String get(String key) {
