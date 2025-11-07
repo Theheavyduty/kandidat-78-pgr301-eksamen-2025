@@ -48,3 +48,5 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
+
+# ci: kick PR run Fri Nov  7 16:03:25 CET 2025
