@@ -22,10 +22,10 @@ Resources:
       Handler: app.lambda_handler
       Environment:
         Variables:
-          S3_BUCKET: !Ref S3BucketName
+          S3_BUCKET: kandidat-78-data
       Policies:
         - S3CrudPolicy:
-            BucketName: !Ref S3BucketName
+            BucketName: kandidat-78-data
         - Statement:
           - Effect: Allow
             Action:
