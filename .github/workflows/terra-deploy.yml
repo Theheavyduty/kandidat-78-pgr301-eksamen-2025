@@ -1,13 +1,13 @@
 name: terraform-ci
 
 on:
-  pull_request:
-    # Gjelder PR-er mot alle base-branched
+  push:
+    branches: [ "main" ]          # Apply kun på main
     paths:
       - "infra-s3/**"
       - ".github/**"
-  push:
-    branches: [ "main" ]          # Apply kun på main
+  pull_request:
+    # Gjelder PR-er mot alle base-branched
     paths:
       - "infra-s3/**"
       - ".github/**"
