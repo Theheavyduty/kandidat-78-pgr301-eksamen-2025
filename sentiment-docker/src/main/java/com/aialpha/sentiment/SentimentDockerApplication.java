@@ -8,6 +8,7 @@ public class SentimentDockerApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(SentimentDockerApplication.class, args);
+        System.out.println("Sentiment Docker Application started...");
 
     }
 }
