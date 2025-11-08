@@ -2,12 +2,13 @@ name: terraform-ci
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened]
     # Gjelder PR-er til hvilken som helst base-branch
     paths:
       - "infra-s3/**"
       - ".github/**"
   push:
-    branches: [ "main" ]                    # Apply kun på main
+    branches: [ "main" ]          # Apply kun på main
     paths:
       - "infra-s3/**"
       - ".github/**"
@@ -19,15 +20,26 @@ env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
   BUCKET_NAME: kandidat-${{ secrets.KANDIDATNR }}-data
+  TF_INPUT: "false"
+  TF_IN_AUTOMATION: "true"
 
 jobs:
   # PR: fmt/validate/plan (ingen apply)
-  tf-validate-plan:
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    tf-validate-plan:
+    name: Terraform Plan (PR)
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    defaults: { run: { working-directory: infra-s3 } }
+    defaults:
+      run:
+        working-directory: infra-s3
+        shell: bash
     steps:
       - uses: actions/checkout@v4
+
+      # Viktig: fjerne eventuelle committed/stale providere
+      - name: Clean local Terraform dir
+        run: rm -rf .terraform
+
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.9.6
@@ -39,30 +51,39 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Terraform init
-        run: terraform init -input=false
-
       - name: Terraform fmt -check
         run: terraform fmt -check -recursive
 
+      # Fjern -lockfile=readonly slik at runner kan skrive inn linux_amd64-checksums midlertidig
+      - name: Terraform init
+        run: terraform init -input=false
+
       - name: Terraform validate
-        run: terraform validate
+        run: terraform validate -no-color
 
       - name: Terraform plan
-        run: terraform plan -input=false -var="bucket_name=${{ env.BUCKET_NAME }}" -out=tfplan
+        run: terraform plan -no-color -input=false -var="bucket_name=${{ env.BUCKET_NAME }}" -out=tfplan
 
       - name: Last opp plan som artifact
         uses: actions/upload-artifact@v4
         with:
           name: tfplan
           path: infra-s3/tfplan
+          if-no-files-found: error
+
 
   # Prod: apply på main
   tf-apply:
-    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/main') }}
+    name: Terraform Apply (main)
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
-    concurrency: { group: terraform-apply, cancel-in-progress: false }
-    defaults: { run: { working-directory: infra-s3 } }
+    concurrency:
+      group: terraform-apply
+      cancel-in-progress: false
+    defaults:
+      run:
+        working-directory: infra-s3
+        shell: bash
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
@@ -79,5 +100,8 @@ jobs:
       - name: Terraform init
         run: terraform init -input=false
 
+      - name: Terraform validate
+        run: terraform validate -no-color
+
       - name: Terraform apply
-        run: terraform apply -input=false -auto-approve -var="bucket_name=${{ env.BUCKET_NAME }}"
+        run: terraform apply -no-color -input=false -auto-approve -var="bucket_name=${{ env.BUCKET_NAME }}"
