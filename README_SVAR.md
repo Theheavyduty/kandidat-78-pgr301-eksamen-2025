@@ -52,6 +52,33 @@ Kunnskapsdeling. IaC i repoet, README_SVAR.md med terskelbegrunnelser, og dashbo
 Konklusjon
 KI kan gi betydelig bedre flyt ved å automatisere stillas og repetisjon, men kun når output raskt valideres i CI og i produksjon. Feedback må styrkes: tester, telemetri, dashboards og alarmer gjør at vi oppdager AI-feil tidlig og kobler dem til målbare signaler. Kontinuerlig læring skjer når vi bruker KI som sparringspartner, men beholder menneskelig dømmekraft og bygger teamets “guardrails” i kode, dokumentasjon og prosess. Den beste balansen jeg erfarte i oppgaven er: la KI skrive førsteutkastet, la pipeline og observabilitet dømme, og la teamet justere – slik blir både tempo, kvalitet og læring bedre over tid.
 
-### Oppgave 2 
+### Oppgave 2 Del 1
 - Her er url: https://79ba8jc1jh.execute-api.eu-west-1.amazonaws.com/Prod/analyze/ 
 - Her er s43 object: s3://kandidat-78-data/midlertidig/comprehend-20251107-225637-2718ec4f.json
+### Oppgave 2 Del 2
+- Her er linken til workflow filen: https://github.com/Theheavyduty/pgr301-eksamen-2025-main/actions/runs/19186132797/workflow
+https://github.com/Theheavyduty/pgr301-eksamen-2025-main/blob/main/.github/workflows/sam-deploy.yml
+- Her er linken til PR workflow builden: https://github.com/Theheavyduty/pgr301-eksamen-2025-main/actions/runs/19186132797/job/54852947170
+- Instruks til sensor: 
+    #### Før man følger instruksene så må man legge til secrets i github
+    - AWS_ACCESS_KEY_ID
+    - AWS_SECRET_ACCESS_KEY
+    - AWS_REGION (eu-west-1)
+    - KANDIDATNR
+    #### Hvordan man kjører workflow PR
+    1. Lag en ny branch
+    2. Gå til den nye branchen git switch/git checkout
+    3. Gjør en endring i workflow filen (sam-deploy.yml) det kan være hva som helst, f.eks kommentar på bunnen av filen
+    4. Git add filene, commit og push endringen i den nye branchen
+    5. Gå til github sin nettside og lag en PR, fra nye branchen til main. 
+    6. Så merge og sjekk actions.
+### Oppgave 3
+- Her er linken til workflow filen: https://github.com/Theheavyduty/pgr301-eksamen-2025-main/blob/main/.github/workflows/docker-build.yml 
+https://github.com/Theheavyduty/pgr301-eksamen-2025-main/actions/runs/19183325210/workflow
+- Her er linken til workflow builden: https://github.com/Theheavyduty/pgr301-eksamen-2025-main/actions/runs/19183325210/job/54844867697
+- Forklaring på tagging strategi:
+    - Latest: Lett å trekke den siste image uten å huske en spesifikk version
+    - sha-short: Sporbar peker på nøyaktig commit. Det gir reproducerbare deploys, enkel rollback og revisjonsspor
+    - 
+- Container image navn: theheavyduty/sentiment-docker
+- Beskrivelse til sensor

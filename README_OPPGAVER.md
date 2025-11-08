@@ -1,3 +1,4 @@
+
 # Oppgavetekst PGR301- 2025 Høst
 
 ## Den tekniske utfordringen
@@ -316,6 +317,7 @@ Test API:
 curl -X POST http://localhost:8080/api/analyze \
   -H "Content-Type: application/json" \
   -d '{"requestId": "test-123", "text": "NVIDIA soars while Intel struggles with declining sales"}'
+  
 ```
 
 #### Leveranser:
