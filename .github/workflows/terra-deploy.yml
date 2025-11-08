@@ -23,7 +23,7 @@ env:
 jobs:
   # PR: fmt/validate/plan (ingen apply)
   tf-validate-plan:
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: infra-s3 } }
     steps:
@@ -75,9 +75,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Terraform init
-        run: terraform init -input=false
 
       - name: Terraform apply
         run: terraform apply -input=false -auto-approve -var="bucket_name=${{ env.BUCKET_NAME }}"
