@@ -10,7 +10,7 @@ on:
     # Gjelder PR-er mot alle base-branched
     paths:
       - "infra-s3/**"
-      - ".github/**"
+      - ".github/**"      
 
 permissions:
   contents: read
