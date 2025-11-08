@@ -72,5 +72,5 @@ jobs:
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}  
         run: terraform apply -no-color -input=false -auto-approve -var="bucket_name=${{ env.BUCKET_NAME }}"
 
-        #HELLO
+
             
