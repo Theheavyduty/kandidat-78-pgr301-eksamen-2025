@@ -24,8 +24,7 @@ env:
   TF_IN_AUTOMATION: "true"
 
 jobs:
-  # PR: fmt/validate/plan (ingen apply)
-    tf-validate-plan:
+  tf-validate-plan:
     name: Terraform Plan (PR)
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -35,35 +34,25 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v4
-
-      # Viktig: fjerne eventuelle committed/stale providere
       - name: Clean local Terraform dir
         run: rm -rf .terraform
-
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.9.6
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-
       - name: Terraform fmt -check
         run: terraform fmt -check -recursive
-
-      # Fjern -lockfile=readonly slik at runner kan skrive inn linux_amd64-checksums midlertidig
       - name: Terraform init
         run: terraform init -input=false
-
       - name: Terraform validate
         run: terraform validate -no-color
-
       - name: Terraform plan
         run: terraform plan -no-color -input=false -var="bucket_name=${{ env.BUCKET_NAME }}" -out=tfplan
-
       - name: Last opp plan som artifact
         uses: actions/upload-artifact@v4
         with:
@@ -71,8 +60,6 @@ jobs:
           path: infra-s3/tfplan
           if-no-files-found: error
 
-
-  # Prod: apply på main
   tf-apply:
     name: Terraform Apply (main)
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
@@ -89,21 +76,15 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.9.6
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-
       - name: Terraform init
         run: terraform init -input=false
-
       - name: Terraform validate
         run: terraform validate -no-color
-
       - name: Terraform apply
         run: terraform apply -no-color -input=false -auto-approve -var="bucket_name=${{ env.BUCKET_NAME }}"
-
-        
