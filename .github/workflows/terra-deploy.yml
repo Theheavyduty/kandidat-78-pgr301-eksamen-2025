@@ -25,7 +25,7 @@ env:
 
 jobs:
   # PR: fmt/validate/plan (ingen apply)
-  tf-validate-plan:
+    tf-validate-plan:
     name: Terraform Plan (PR)
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -35,6 +35,11 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v4
+
+      # Viktig: fjerne eventuelle committed/stale providere
+      - name: Clean local Terraform dir
+        run: rm -rf .terraform
+
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.9.6
@@ -49,8 +54,9 @@ jobs:
       - name: Terraform fmt -check
         run: terraform fmt -check -recursive
 
-      - name: Terraform init (readonly lockfile)
-        run: terraform init -lockfile=readonly -input=false
+      # Fjern -lockfile=readonly slik at runner kan skrive inn linux_amd64-checksums midlertidig
+      - name: Terraform init
+        run: terraform init -input=false
 
       - name: Terraform validate
         run: terraform validate -no-color
@@ -64,6 +70,7 @@ jobs:
           name: tfplan
           path: infra-s3/tfplan
           if-no-files-found: error
+
 
   # Prod: apply på main
   tf-apply:
