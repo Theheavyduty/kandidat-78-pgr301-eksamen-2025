@@ -2,7 +2,6 @@ name: terraform-ci
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
     # Gjelder PR-er til hvilken som helst base-branch
     paths:
       - "infra-s3/**"
