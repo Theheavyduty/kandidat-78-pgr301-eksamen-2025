@@ -1,3 +1,78 @@
+# Besvarelse kandidat 78
+
+### Oppgave 2 Del 1
+- Her er url fra sam: https://79ba8jc1jh.execute-api.eu-west-1.amazonaws.com/Prod/analyze/ 
+- Her er s3 object: s3://kandidat-78-data/midlertidig/comprehend-20251107-225637-2718ec4f.json
+### Oppgave 2 Del 2
+- Her er linken til workflow filen: https://github.com/Theheavyduty/pgr301-eksamen-2025-main/actions/runs/19186132797/workflow
+https://github.com/Theheavyduty/pgr301-eksamen-2025-main/blob/main/.github/workflows/sam-deploy.yml
+- Her er linken til PR workflow builden: https://github.com/Theheavyduty/pgr301-eksamen-2025-main/actions/runs/19186132797/job/54852947170
+- Instruks til sensor: 
+    #### Før man følger instruksene så må man legge til secrets i github
+    - AWS_ACCESS_KEY_ID
+    - AWS_SECRET_ACCESS_KEY
+    - AWS_REGION (eu-west-1)
+    - KANDIDATNR
+    #### Hvordan man kjører workflow PR
+    1. Lag en ny branch
+    2. Gå til den nye branchen git switch/git checkout
+    3. Gjør en endring i workflow filen (sam-deploy.yml) det kan være hva som helst, f.eks kommentar på bunnen av filen
+    4. Git add filene, commit og push endringen i den nye branchen
+    5. Gå til github sin nettside og lag en PR, fra nye branchen til main. 
+    6. Så merge og sjekk actions.
+### Oppgave 3
+- Her er linken til workflow filen: https://github.com/Theheavyduty/pgr301-eksamen-2025-main/blob/main/.github/workflows/docker-build.yml 
+https://github.com/Theheavyduty/pgr301-eksamen-2025-main/actions/runs/19183325210/workflow
+- Her er linken til workflow builden: https://github.com/Theheavyduty/pgr301-eksamen-2025-main/actions/runs/19183325210/job/54844867697
+- Forklaring på tagging strategi:
+    - Latest: Lett å trekke den siste image uten å huske en spesifikk version
+    - sha-short: Sporbar peker på nøyaktig commit. Det gir reproducerbare deploys, enkel rollback og revisjonsspor
+    - 
+- Container image navn: theheavyduty/sentiment-docker
+- Beskrivelse hvordan kjøre workflow:
+    - Legg til github secrets
+        - Docker username (DOCKER_USERNAME)
+        - Docker token (DOCKER_TOKEN)
+    - Gjør en endring i sentiment-docker f.eks legg til en enkel system print i [Application filen](sentiment-docker/src/main/java/com/aialpha/sentiment/SentimentDockerApplication.java), eller fjern det hvis det er en der fra før
+    - Git add, commit og push endringen i main branch
+    - Sjekk github actions
+
+### Oppgave 4 Del 1
+(Skjermbildene ligger i media mappen)
+
+<img width="1181" alt="screenshot1" src="media/Skjermbilde1.png">
+<img width="1181" alt="screenshot2" src="media/Skjermbilde2.png">
+<img width="1181" alt="screenshot3" src="media/Skjermbilde3.png">
+<img width="1181" alt="screenshot4" src="media/Skjermbilde4.png">
+
+#### Timer (sentiment.bedrock.duration)
+
+- Hvorfor Timer: Måler varighet med start/slutt og samler count/sum/max + (valgfritt) percentiler/histogram. Det passer perfekt til eksterne kall hvor vi vil følge p50/p90/p99 og alarmere når f.eks. p95 > 2s.
+
+#### DistributionSummary (sentiment.confidence)
+
+- Hvorfor DistributionSummary: Vi måler verdier, ikke tid – og vil se fordelingen av confidence (0.0–1.0). DistributionSummary gir count/sum/max og støtte for percentiler (de du ser som 0.5/0.9/0.99 i CloudWatch). Det gjør driftsovervåkning av kvalitet mulig (oppdage drift/bias).
+
+#### Counter (sentiment.analysis.count.count)
+
+- Hvorfor Counter: Teller hendelser som alltid øker – her: antall selskaper analysert, brutt ned per sentiment (og company). Dette gir oss throughput og gjør det enkelt å ta rater (per minutt) i CloudWatch.
+
+#### Gauge (sentiment.companies.detected.last.value)
+
+- Hvorfor Gauge: En tilstand som kan gå opp og ned – “hvor mange selskaper fant siste analyse?”. Counter passer ikke (den bare øker). Gauge viser raskt om parseren “faller av” (f.eks. plutselig 0).
+
+### Oppgave 4 Del 2
+
+(Skjermbildene ligger i media mappen)
+
+<img src="media/SkjermbildeEmail.png">
+
+<img src="media/SkjermbildeAlarmConsole.png">
+
+<img src="media/SkjermbildeConsoleMetric.png">
+
+
+### Oppgave 5
 Innledning
 KI-assistert utvikling kan øke tempoet dramatisk, men det endrer også risikoprofilen og krever strammere DevOps-praksis. I denne drøftingen vurderer jeg hvordan KI påvirker de tre DevOps-prinsippene – flyt, feedback og kontinuerlig læring – med eksempler fra oppgavene: Terraform for S3 og CloudWatch, GitHub Actions for SAM/Docker, samt instrumentering/alarmer med Micrometer og CloudWatch.
 1. Flyt (Flow)
@@ -51,34 +126,3 @@ retrospektiver hvor teamet dokumenterer hva KI foreslo og hva vi endret.
 Kunnskapsdeling. IaC i repoet, README_SVAR.md med terskelbegrunnelser, og dashboards/alarmer som “levende dokumentasjon” sikrer at læring blir kollektiv. Nye ferdigheter som trengs: skrive verifiserbare prompts/akseptansekriterier, tolke CI/observability-signal, og praktisk sikkerhet (secrets-håndtering, minst privilegium).
 Konklusjon
 KI kan gi betydelig bedre flyt ved å automatisere stillas og repetisjon, men kun når output raskt valideres i CI og i produksjon. Feedback må styrkes: tester, telemetri, dashboards og alarmer gjør at vi oppdager AI-feil tidlig og kobler dem til målbare signaler. Kontinuerlig læring skjer når vi bruker KI som sparringspartner, men beholder menneskelig dømmekraft og bygger teamets “guardrails” i kode, dokumentasjon og prosess. Den beste balansen jeg erfarte i oppgaven er: la KI skrive førsteutkastet, la pipeline og observabilitet dømme, og la teamet justere – slik blir både tempo, kvalitet og læring bedre over tid.
-
-### Oppgave 2 Del 1
-- Her er url: https://79ba8jc1jh.execute-api.eu-west-1.amazonaws.com/Prod/analyze/ 
-- Her er s43 object: s3://kandidat-78-data/midlertidig/comprehend-20251107-225637-2718ec4f.json
-### Oppgave 2 Del 2
-- Her er linken til workflow filen: https://github.com/Theheavyduty/pgr301-eksamen-2025-main/actions/runs/19186132797/workflow
-https://github.com/Theheavyduty/pgr301-eksamen-2025-main/blob/main/.github/workflows/sam-deploy.yml
-- Her er linken til PR workflow builden: https://github.com/Theheavyduty/pgr301-eksamen-2025-main/actions/runs/19186132797/job/54852947170
-- Instruks til sensor: 
-    #### Før man følger instruksene så må man legge til secrets i github
-    - AWS_ACCESS_KEY_ID
-    - AWS_SECRET_ACCESS_KEY
-    - AWS_REGION (eu-west-1)
-    - KANDIDATNR
-    #### Hvordan man kjører workflow PR
-    1. Lag en ny branch
-    2. Gå til den nye branchen git switch/git checkout
-    3. Gjør en endring i workflow filen (sam-deploy.yml) det kan være hva som helst, f.eks kommentar på bunnen av filen
-    4. Git add filene, commit og push endringen i den nye branchen
-    5. Gå til github sin nettside og lag en PR, fra nye branchen til main. 
-    6. Så merge og sjekk actions.
-### Oppgave 3
-- Her er linken til workflow filen: https://github.com/Theheavyduty/pgr301-eksamen-2025-main/blob/main/.github/workflows/docker-build.yml 
-https://github.com/Theheavyduty/pgr301-eksamen-2025-main/actions/runs/19183325210/workflow
-- Her er linken til workflow builden: https://github.com/Theheavyduty/pgr301-eksamen-2025-main/actions/runs/19183325210/job/54844867697
-- Forklaring på tagging strategi:
-    - Latest: Lett å trekke den siste image uten å huske en spesifikk version
-    - sha-short: Sporbar peker på nøyaktig commit. Det gir reproducerbare deploys, enkel rollback og revisjonsspor
-    - 
-- Container image navn: theheavyduty/sentiment-docker
-- Beskrivelse til sensor

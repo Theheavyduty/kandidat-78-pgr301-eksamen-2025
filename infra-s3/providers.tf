@@ -11,8 +11,6 @@ terraform {
 
 
   # Terraform state i S3 (krav)
-
-  #test
   backend "s3" {
     bucket  = "pgr301-terraform-state"
     key     = "kandidat-<KANDIDATNR>/infra-s3/terraform.tfstate" # Overstyres i CI
