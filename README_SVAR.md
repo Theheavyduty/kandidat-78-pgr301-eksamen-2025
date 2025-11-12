@@ -1,8 +1,8 @@
 # Besvarelse kandidat 78
 
 ### Oppgave 2 Del 1
-- Her er url fra sam: https://79ba8jc1jh.execute-api.eu-west-1.amazonaws.com/Prod/analyze/ 
-- Her er s3 object: s3://kandidat-78-data/midlertidig/comprehend-20251107-225637-2718ec4f.json
+- Her er url fra sam: https://02os1hl20d.execute-api.eu-west-1.amazonaws.com/Prod/analyze/
+- Her er s3 object: s3://kandidat-78-data/midlertidig/comprehend-20251112-184243-2718ec4f.json
 ### Oppgave 2 Del 2
 - Her er linken til workflow filen: https://github.com/Theheavyduty/pgr301-eksamen-2025-main/actions/runs/19186132797/workflow
 https://github.com/Theheavyduty/pgr301-eksamen-2025-main/blob/main/.github/workflows/sam-deploy.yml
