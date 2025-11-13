@@ -2,9 +2,9 @@ name: docker-build-publish
 
 on:
   push:
-    branches: [ "main" ]               # Publiser kun på main
+    branches: [ "main" ]
     paths:
-      - "sentiment-docker/**"          # Kun når sentiment-docker/** endres
+      - "sentiment-docker/**"
 
 permissions:
   contents: read

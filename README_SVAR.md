@@ -1,10 +1,12 @@
 # Besvarelse kandidat 78
-
+--- 
+## Oppgave 2
 ### Oppgave 2 Del 1
 - Her er url fra sam: https://02os1hl20d.execute-api.eu-west-1.amazonaws.com/Prod/analyze/
 - Her er s3 object: s3://kandidat-78-data/midlertidig/comprehend-20251112-184243-2718ec4f.json
+Note: Liten endring i template.yaml endra python version fra 3.11 til 3.12. Jeg har satt sletting i midlertidig mappen 30 dager, det er en default verdi i [variables.tf](infra-s3/variables.tf)
 ### Oppgave 2 Del 2
-- Her er linken til workflow filen: https://github.com/Theheavyduty/pgr301-eksamen-2025-main/actions/runs/19186132797/workflow
+- Her er linken til [workflow filen](.github/workflows/sam-deploy.yml): https://github.com/Theheavyduty/pgr301-eksamen-2025-main/actions/runs/19186132797/workflow
 https://github.com/Theheavyduty/pgr301-eksamen-2025-main/blob/main/.github/workflows/sam-deploy.yml
 - Her er linken til PR workflow builden: https://github.com/Theheavyduty/pgr301-eksamen-2025-main/actions/runs/19186132797/job/54852947170
 - Instruks til sensor: 
@@ -20,14 +22,17 @@ https://github.com/Theheavyduty/pgr301-eksamen-2025-main/blob/main/.github/workf
     4. Git add filene, commit og push endringen i den nye branchen
     5. Gå til github sin nettside og lag en PR, fra nye branchen til main. 
     6. Så merge og sjekk actions.
+
+---
+
 ### Oppgave 3
-- Her er linken til workflow filen: https://github.com/Theheavyduty/pgr301-eksamen-2025-main/blob/main/.github/workflows/docker-build.yml 
+- Her er linken til [workflow filen](.github/workflows/docker-build.yml): https://github.com/Theheavyduty/pgr301-eksamen-2025-main/blob/main/.github/workflows/docker-build.yml 
 https://github.com/Theheavyduty/pgr301-eksamen-2025-main/actions/runs/19183325210/workflow
 - Her er linken til workflow builden: https://github.com/Theheavyduty/pgr301-eksamen-2025-main/actions/runs/19183325210/job/54844867697
 - Forklaring på tagging strategi:
     - Latest: Lett å trekke den siste image uten å huske en spesifikk version
     - sha-short: Sporbar peker på nøyaktig commit. Det gir reproducerbare deploys, enkel rollback og revisjonsspor
-    - 
+    
 - Container image navn: theheavyduty/sentiment-docker
 - Beskrivelse hvordan kjøre workflow:
     - Legg til github secrets
@@ -37,13 +42,16 @@ https://github.com/Theheavyduty/pgr301-eksamen-2025-main/actions/runs/1918332521
     - Git add, commit og push endringen i main branch
     - Sjekk github actions
 
+---
+## Oppgave 4
+
 ### Oppgave 4 Del 1
 (Skjermbildene ligger i media mappen)
 
-<img width="1181" alt="screenshot1" src="media/Skjermbilde1.png">
-<img width="1181" alt="screenshot2" src="media/Skjermbilde2.png">
-<img width="1181" alt="screenshot3" src="media/Skjermbilde3.png">
-<img width="1181" alt="screenshot4" src="media/Skjermbilde4.png">
+[<img width="1181" alt="screenshot1" src="media/Skjermbilde1.png">](media/Skjermbilde1.png)
+[<img width="1181" alt="screenshot2" src="media/Skjermbilde2.png">](media/Skjermbilde2.png)
+[<img width="1181" alt="screenshot3" src="media/Skjermbilde3.png">](media/Skjermbilde3.png)
+[<img width="1181" alt="screenshot4" src="media/Skjermbilde4.png">](media/Skjermbilde4.png)
 
 #### Timer (sentiment.bedrock.duration)
 
@@ -65,14 +73,14 @@ https://github.com/Theheavyduty/pgr301-eksamen-2025-main/actions/runs/1918332521
 
 (Skjermbildene ligger i media mappen)
 
-<img src="media/SkjermbildeEmail.png">
+[<img src="media/SkjermbildeEmail.png">](media/SkjermbildeEmail.png)
 
-<img src="media/SkjermbildeAlarmConsole.png">
+[<img src="media/SkjermbildeAlarmConsole.png">](media/SkjermbildeAlarmConsole.png)
 
-<img src="media/SkjermbildeConsoleMetric.png">
+[<img src="media/SkjermbildeConsoleMetric.png">](media/SkjermbildeConsoleMetric.png)
 
-
-### Oppgave 5
+---
+## Oppgave 5
 Innledning
 Min vurdering er at KI-assistenter kan øke hastighet og kvalitet i DevOps—men bare når de kobles til gode praksiser for bygg, testing, observabilitet og governance. Uten den rammen skaper KI nye flaskehalser: svakt eierskap til kode, flere feil i produksjon og læring som “outsources” til modellen. Nedenfor drøfter jeg effektene på Flyt, Feedback og Kontinuerlig læring med eksempler fra arbeidet med Micrometer-metrikkene, CloudWatch-dashboard/alarmer og GitHub Actions-workflowene (Terraform/SAM).
 1) Flyt (Flow)
@@ -151,3 +159,5 @@ Data hygiene (unngå å lekke proprietær konfig i prompts).
 
 Konklusjon
 KI skyver DevOps i retning høyere flyt—raskere scaffolding og færre lokale flaskehalser—men trygt tempo forutsetter gode feedback-sløyfer (test, observability, alarms) og bevisst læring (review, ADR, retros). I praksis fungerte dette best da vi kombinerte KI-generert instrumentering (Micrometer), målinger i CloudWatch og slueseporter i CI/CD (plan vs. apply). Min subjektive konklusjon: bruk KI aggressivt til å produsere førsteutkast og repetitivt arbeid, men la DevOps-prinsippene være rammen som former hva som faktisk slippes til produksjon—og hva teamet lærer av etterpå.
+
+---

@@ -13,7 +13,7 @@ on:
 
 permissions:
   contents: read
-  # (valgfritt for OIDC): id-token: write
+
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
@@ -22,7 +22,7 @@ env:
   DATA_BUCKET: kandidat-${{ secrets.KANDIDATNR }}-data
   STACK_NAME: sam-sentiment-${{ secrets.KANDIDATNR }}
 
-# Avbryt pågående PR-runs når nye commits kommer til samme branch
+
 concurrency:
   group: sam-${{ github.event_name }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
